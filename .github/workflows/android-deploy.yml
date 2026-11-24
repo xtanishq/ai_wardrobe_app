@@ -1,0 +1,119 @@
+name: Android Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: "Deployment Track"
+        required: true
+        default: "internal"
+        type: choice
+        options:
+          - internal
+          - production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-deploy-${{ github.event.inputs.track }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # First-time Android/NDK setup can be slow on a fresh hosted runner. The
+    # previous 60-minute job limit sent SIGTERM (exit 143) during Gradle.
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Free disk space before installing build dependencies.
+      - name: Free Disk Space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/powershell
+          sudo apt-get clean
+
+          echo "Disk space after cleanup:"
+          df -h
+
+      - name: Decode Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+
+      - name: Create Play Store Key
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+        run: |
+          printf '%s' "$PLAY_STORE_JSON_KEY" > android/play-store-key.json
+
+      - name: Create key.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.6"
+          channel: stable
+          cache: true
+
+      - name: Flutter Pub Get
+        run: flutter pub get
+
+      - name: Flutter Test
+        run: flutter test
+
+      - name: Check Disk Space Before Build
+        run: |
+          df -h
+          df -i
+          du -sh "$HOME/.gradle" 2>/dev/null || true
+          du -sh "$HOME/.pub-cache" 2>/dev/null || true
+
+      - name: Build App Bundle
+        # Keep the default icon tree-shaking. It substantially reduces the
+        # release bundle and avoids unnecessary work on the hosted runner.
+        run: flutter build appbundle --release
+
+      - name: Check Generated Bundle
+        run: |
+          ls -lh build/app/outputs/bundle/release/ || true
+          df -h
+
+      - name: Deploy with Fastlane
+        working-directory: android
+        env:
+          PLAY_STORE_JSON_PATH: play-store-key.json
+        run: bundle exec fastlane ${{ github.event.inputs.track }}

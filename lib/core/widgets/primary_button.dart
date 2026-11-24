@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -20,17 +21,35 @@ class PrimaryButton extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: isSecondary ? Colors.transparent : Colors.black,
-          borderRadius: BorderRadius.circular(100),
-          border: isSecondary ? Border.all(color: Colors.black, width: 2) : null,
+          borderRadius: BorderRadius.circular(24),
+          gradient: isSecondary
+              ? null
+              : const LinearGradient(
+                  colors: [AppTheme.accentPurple, AppTheme.accentBlue],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+          border: isSecondary
+              ? Border.all(color: AppTheme.borderSubtle, width: 1.5)
+              : null,
+          boxShadow: isSecondary
+              ? []
+              : [
+                  BoxShadow(
+                    color: AppTheme.accentPurple.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
         ),
         child: Center(
           child: Text(
             text,
-            style: TextStyle(
-              color: isSecondary ? Colors.black : const Color(0xFFFFECA3),
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
         ),

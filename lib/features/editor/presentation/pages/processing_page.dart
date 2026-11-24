@@ -51,14 +51,14 @@ class _ProcessingPageState extends State<ProcessingPage> with SingleTickerProvid
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AppTheme.primary.withOpacity(_controller.value),
+                        AppTheme.accentPurple.withOpacity(_controller.value),
                         Colors.transparent,
                       ],
                     ),
                   ),
                   child: const Center(
                     child: CircularProgressIndicator(
-                      color: AppTheme.primary,
+                      color: AppTheme.accentPurple,
                     ),
                   ),
                 );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/widgets/feature_card.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_bottom_nav.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,300 +14,271 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFECA3),
+      backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ─── HEADER ────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "EaseFX",
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Create stunning AI edits instantly",
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 16,
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [AppTheme.accentPurple, AppTheme.accentBlue],
+                      ).createShader(bounds),
+                      child: Text(
+                        "Glimora AI",
+                        style:
+                            Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              
-              // TRENDING SECTION
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-                child: Text(
-                  "Trending",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              
-              // TOP PAGEVIEW: Cloth Change & AI Filters
-              SizedBox(
-                height: 250,
-                child: PageView(
-                  controller: PageController(viewportFraction: 0.9),
-                  children: [
-                    _buildBannerCard(
-                      context: context,
-                      assetPath: "asset/clothchnage.png",
-                      title: "Cloth Changer",
-                      onTap: () => context.push('/editor'),
-                    ),
-                    _buildBannerCard(
-                      context: context,
-                      assetPath: "asset/aifilter.png",
-                      title: "AI Filters",
-                      onTap: () => context.push('/ai-filters'),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "AI-powered photo studio",
+                      style: TextStyle(color: AppTheme.textMuted, fontSize: 14),
                     ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
-              // RETOUCH SECTION HEADER
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Retouch",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[600]),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // HORIZONTAL LIST FOR HEADSHOT (AND FUTURE ITEMS)
+
+              // ─── 1. FEATURED — Hero Banner ─────────────
+              _sectionTitle("Featured"),
+              const SizedBox(height: 12),
               SizedBox(
                 height: 180,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: PageView(
+                  controller: PageController(viewportFraction: 0.96),
                   children: [
-                    _buildHorizontalCard(
-                      context: context,
-                      assetPath: "asset/final_headshot.png",
-                      title: "Headshot",
-                      width: 140,
-                      onTap: () => context.push('/headshot'),
+                    _heroBanner(
+                      asset: "asset/clothchnage.png",
+                      title: "Cloth Changer",
+                      subtitle: "Try outfits instantly",
+                      onTap: () => _goTo('/editor'),
                     ),
-                    const SizedBox(width: 16),
-                    // Placeholder for future retouch items
-                    _buildHorizontalCard(
-                      context: context,
-                      assetPath: "asset/aifilter.png", // Just a placeholder
-                      title: "Coming Soon",
-                      width: 140,
-                      onTap: () {},
+                    _heroBanner(
+                      asset: "asset/aifilter.png",
+                      title: "AI Filters",
+                      subtitle: "Stunning creative styles",
+                      onTap: () => _goTo('/ai-filters'),
                     ),
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // HAIRSWAP SECTION
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.0),
-                child: Text(
-                  "Hair Studio",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+
+              const SizedBox(height: 28),
+
+              // ─── 2. AI GENERATION ──────────────────────
+              _sectionTitle("AI Generation"),
+              const SizedBox(height: 12),
+              _horizontalScroll([
+                _compactCard(
+                  asset: "asset/texttoimage.png",
+                  label: "Text → Image",
+                  onTap: () => _goTo('/text-to-image'),
+                ),
+                _compactCard(
+                  asset: "asset/textandimg.png",
+                  label: "Image + Text",
+                  onTap: () => _goTo('/image-and-text'),
+                ),
+              ]),
+
+              const SizedBox(height: 28),
+
+              // ─── 3. RETOUCH & ENHANCE ──────────────────
+              _sectionTitle("Retouch & Enhance"),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 180,
+                child: PageView(
+                  controller: PageController(viewportFraction: 0.96),
+                  children: [
+                    _heroBanner(
+                      asset: "asset/enhance.png",
+                      title: "AI Enhance",
+                      subtitle: "Upscale & sharpen photos",
+                      onTap: () => _goTo('/enhance'),
+                    ),
+                    _heroBanner(
+                      asset: "asset/removebg.png",
+                      title: "Remove BG",
+                      subtitle: "Clean background removal",
+                      onTap: () => _goTo('/remove-background'),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: _buildBannerCard(
-                  context: context,
-                  assetPath: "asset/hairswap.png",
-                  title: "Hair Swap",
-                  height: 200,
-                  fullWidth: true,
-                  onTap: () => context.push('/hair-swap'),
+
+              const SizedBox(height: 28),
+
+              // ─── 4. STYLE TRANSFER ─────────────────────
+              _sectionTitle("Style Transfer"),
+              const SizedBox(height: 12),
+              _horizontalScroll([
+                _compactCard(
+                  asset: "asset/hairswap.png",
+                  label: "Hair Swap",
+                  onTap: () => _goTo('/hair-swap'),
                 ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // TEXT TO IMAGE SECTION
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.0),
-                child: Text(
-                  "AI Generator",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                _compactCard(
+                  asset: "asset/texttoimage.png",
+                  label: "Art Styles",
+                  onTap: () => _goTo('/art-styles'),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: _buildBannerCard(
-                  context: context,
-                  assetPath: "asset/texttoimage.png",
-                  title: "Text to Image",
-                  height: 200,
-                  fullWidth: true,
-                  onTap: () => context.push('/text-to-image'),
+                _compactCard(
+                  asset: "asset/kontextflux.png",
+                  label: "Kontext Flux",
+                  onTap: () => _goTo('/kontext-flux'),
                 ),
-              ),
-              const SizedBox(height: 24),
-              
-              // KONTEXT FLUX SECTION
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.0),
-                child: Text(
-                  "Advanced Edits",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: _buildBannerCard(
-                  context: context,
-                  assetPath: "asset/kontextflux.png",
-                  title: "Kontext Flux",
-                  height: 200,
-                  fullWidth: true,
-                  onTap: () => context.push('/kontext-flux'),
-                ),
-              ),
-              
-              const SizedBox(height: 40),
+              ]),
+
+              const SizedBox(height: 32),
             ],
           ),
         ),
       ),
+      extendBody: true,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 0,
         onTap: (index) {
-          if (index == 1) {
-            context.go('/creations');
-          }
+          if (index == 1) context.go('/creations');
         },
       ),
     );
   }
 
-  Widget _buildBannerCard({
-    required BuildContext context,
-    required String assetPath,
-    required String title,
-    double? height,
-    bool fullWidth = false,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: height == null ? 1 : 0,
-            child: Container(
-              height: height,
-              margin: EdgeInsets.only(right: fullWidth ? 0 : 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                image: DecorationImage(
-                  image: AssetImage(assetPath),
-                  fit: BoxFit.cover, // Use cover to fill banner area
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: EdgeInsets.only(right: fullWidth ? 0 : 16),
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
+  void _goTo(String route) => context.push(route);
+
+  // ═══════════════════════════════════════════════════════════════
+  //  WIDGET BUILDERS
+  // ═══════════════════════════════════════════════════════════════
+
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppTheme.textMain,
+          letterSpacing: 0.3,
+        ),
       ),
     );
   }
 
-  Widget _buildHorizontalCard({
-    required BuildContext context,
-    required String assetPath,
+  /// Full-width hero banner used in the PageView carousel.
+  Widget _heroBanner({
+    required String asset,
     required String title,
-    required double width,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppTheme.borderSubtle, width: 1),
+          image: DecorationImage(
+            image: AssetImage(asset),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Horizontally scrolling list wrapper.
+  Widget _horizontalScroll(List<Widget> children) {
+    return SizedBox(
+      height: 190,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: children.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        itemBuilder: (_, i) => children[i],
+      ),
+    );
+  }
+
+  /// Compact card for horizontal scroll lists.
+  Widget _compactCard({
+    required String asset,
+    required String label,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
-        width: width,
+        width: 200,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppTheme.borderSubtle, width: 1),
                   image: DecorationImage(
-                    image: AssetImage(assetPath),
+                    image: AssetImage(asset),
                     fit: BoxFit.cover,
+                    // colorFilter: ColorFilter.mode(
+                    //   Colors.black.withOpacity(0.35),
+                    //   BlendMode.darken,
+                    // ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              title,
+              label,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: AppTheme.textMain,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -315,6 +286,52 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 2-column grid card for the Retouch section.
+  Widget _gridCard({
+    required String asset,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            height: 130,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppTheme.borderSubtle, width: 1),
+              image: DecorationImage(
+                image: AssetImage(asset),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.15),
+                  BlendMode.darken,
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textMain,
+            ),
+          ),
+        ],
       ),
     );
   }

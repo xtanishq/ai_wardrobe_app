@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class FeatureCard extends StatelessWidget {
   final String title;
@@ -20,11 +21,12 @@ class FeatureCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfacePrimary,
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppTheme.borderSubtle, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppTheme.accentPurple.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 10),
             )
@@ -55,13 +57,16 @@ class FeatureCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: 18,
+                            color: AppTheme.textMain,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           subtitle,
                           style: const TextStyle(
-                            color: Colors.black54,
+                            color: AppTheme.textMuted,
                             fontSize: 12,
                           ),
                           maxLines: 1,
@@ -73,8 +78,10 @@ class FeatureCard extends StatelessWidget {
                   Container(
                     width: 32,
                     height: 32,
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppTheme.accentPurple, AppTheme.accentBlue],
+                      ),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(

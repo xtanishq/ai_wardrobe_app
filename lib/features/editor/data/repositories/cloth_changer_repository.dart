@@ -1,89 +1,94 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import '../../../../features/onboarding/data/repositories/auth_repository.dart';
+import '../../../../core/ai/ai_image_provider.dart';
+import '../../../../core/ai/ai_provider_registry.dart';
 import '../models/wardrobe_style_model.dart';
 
 class ClothChangerRepository {
-  final String _stylesUrl = 'http://my-worker.scratched.workers.dev/api/styles';
-  final String _generateUrl = 'http://my-worker.scratched.workers.dev/api/wardrobe';
+  ClothChangerRepository({AiImageProvider? provider})
+      : _provider = provider ?? AiProviderRegistry.instance.provider;
+
+  final AiImageProvider _provider;
 
   Future<List<WardrobeStyleModel>> fetchStyles() async {
-    try {
-      final String token = AuthRepository().accessToken ?? '';
-      
-      final response = await http.get(
-        Uri.parse(_stylesUrl),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final List<WardrobeStyleModel> styles = [];
-
-        if (data.containsKey('female')) {
-          for (var item in data['female']) {
-            styles.add(WardrobeStyleModel.fromApiJson(item, 'female'));
-          }
-        }
-        
-        if (data.containsKey('male')) {
-          for (var item in data['male']) {
-            styles.add(WardrobeStyleModel.fromApiJson(item, 'male'));
-          }
-        }
-        
-        return styles;
-      } else {
-        throw Exception("Failed to load styles");
-      }
-    } catch (e) {
-      throw Exception("Error fetching styles: $e");
-    }
+    return _styles;
   }
 
-  Future<String> generateClothChange(File imageFile, String styleId) async {
-    try {
-      final String token = AuthRepository().accessToken ?? '';
-      
-      var request = http.MultipartRequest('POST', Uri.parse(_generateUrl));
-      
-      request.headers.addAll({
-        'Authorization': 'Bearer $token',
-      });
-      
-      request.fields['styleId'] = styleId;
-      
-      request.files.add(await http.MultipartFile.fromPath(
-        'image',
-        imageFile.path,
-      ));
-
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        
-        String? imageUrl;
-        if (data['finalImageUrl'] != null) {
-          imageUrl = data['finalImageUrl'];
-        } else if (data['data'] != null && data['data']['result'] != null && data['data']['result']['images'] != null) {
-          imageUrl = data['data']['result']['images'][0]['url'];
-        }
-        
-        if (imageUrl != null) {
-          return imageUrl;
-        } else {
-          throw Exception("Could not parse image URL from response.");
-        }
-      } else {
-        throw Exception("Failed to generate image. Status: ${response.statusCode}");
-      }
-    } catch (e) {
-      throw Exception("Error connecting to server: ${e.toString()}");
-    }
+  Future<String> generateClothChange(File imageFile, String prompt) {
+    return _provider.changeOutfit(image: imageFile, prompt: prompt);
   }
+
+  static const List<WardrobeStyleModel> _styles = [
+    WardrobeStyleModel(
+        id: 'female-casual',
+        style: 'Casual Chic',
+        gender: 'female',
+        displayUrl: 'asset/wardrobe_styles/female_casual.png',
+        beforeUrl: '',
+        hot: true,
+        showFirst: true,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'female-evening',
+        style: 'Elegant Evening Dress',
+        gender: 'female',
+        displayUrl: 'asset/wardrobe_styles/female_evening.png',
+        beforeUrl: '',
+        hot: true,
+        showFirst: false,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'female-traditional',
+        style: 'Traditional Indian Outfit',
+        gender: 'female',
+        displayUrl: 'asset/wardrobe_styles/female_traditional.png',
+        beforeUrl: '',
+        hot: false,
+        showFirst: false,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'female-business',
+        style: 'Modern Business Wear',
+        gender: 'female',
+        displayUrl: 'asset/wardrobe_styles/female_business.png',
+        beforeUrl: '',
+        hot: false,
+        showFirst: false,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'male-streetwear',
+        style: 'Casual Streetwear',
+        gender: 'male',
+        displayUrl: 'asset/wardrobe_styles/male_streetwear.png',
+        beforeUrl: '',
+        hot: true,
+        showFirst: true,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'male-formal',
+        style: 'Tailored Formal Suit',
+        gender: 'male',
+        displayUrl: 'asset/wardrobe_styles/male_formal.png',
+        beforeUrl: '',
+        hot: true,
+        showFirst: false,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'male-traditional',
+        style: 'Traditional Indian Outfit',
+        gender: 'male',
+        displayUrl: 'asset/wardrobe_styles/male_traditional.png',
+        beforeUrl: '',
+        hot: false,
+        showFirst: false,
+        usageCount: ''),
+    WardrobeStyleModel(
+        id: 'male-business',
+        style: 'Smart Business Casual',
+        gender: 'male',
+        displayUrl: 'asset/wardrobe_styles/male_business.png',
+        beforeUrl: '',
+        hot: false,
+        showFirst: false,
+        usageCount: ''),
+  ];
 }

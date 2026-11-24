@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class ImageStyleSelector<T> extends StatelessWidget {
   final List<T> items;
@@ -40,9 +41,18 @@ class ImageStyleSelector<T> extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isSelected ? Colors.black : Colors.transparent,
-                        width: 3,
+                        color: isSelected ? AppTheme.accentPurple : AppTheme.borderSubtle,
+                        width: isSelected ? 3 : 1,
                       ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppTheme.accentPurple.withOpacity(0.4),
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                              )
+                            ]
+                          : null,
                       image: DecorationImage(
                         image: NetworkImage(imageUrlBuilder(item)),
                         fit: BoxFit.cover,
@@ -51,8 +61,8 @@ class ImageStyleSelector<T> extends StatelessWidget {
                     child: isSelected
                         ? Container(
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(13),
+                              color: AppTheme.accentPurple.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: const Center(
                               child: Icon(Icons.check_circle, color: Colors.white, size: 30),
@@ -69,7 +79,7 @@ class ImageStyleSelector<T> extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? Colors.black : Colors.black87,
+                      color: isSelected ? AppTheme.textMain : AppTheme.textMuted,
                     ),
                   ),
                 ],

@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../../../core/utils/app_snackbar.dart';
+import '../../../../core/utils/prompt_safety.dart';
 import '../../data/repositories/kontext_flux_repository.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class KontextFluxPage extends StatefulWidget {
   const KontextFluxPage({Key? key}) : super(key: key);
@@ -16,32 +19,37 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
   final TextEditingController _promptController = TextEditingController();
   final KontextFluxRepository _repository = KontextFluxRepository();
   final ImagePicker _picker = ImagePicker();
-  
+
   File? _selectedImage;
   bool _isLoading = false;
 
   Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-      });
+    try {
+      final image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        setState(() => _selectedImage = File(image.path));
+      }
+    } catch (error) {
+      if (mounted) AppSnackbar.error(context, 'Image selection failed: $error');
     }
   }
 
   void _generateImage() async {
+    if (_isLoading) return;
     final prompt = _promptController.text.trim();
     if (prompt.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a prompt first.')),
-      );
+      AppSnackbar.info(context, 'Please enter a prompt first.');
       return;
     }
-    
+
     if (_selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an image first.')),
-      );
+      AppSnackbar.info(context, 'Please select an image first.');
+      return;
+    }
+
+    if (!PromptSafety.isPromptSafe(prompt)) {
+      AppSnackbar.error(context,
+          'Your prompt contains blocked words. Please ensure it follows our safety guidelines.');
       return;
     }
 
@@ -59,9 +67,7 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
 
     result.fold(
       (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error)),
-        );
+        AppSnackbar.error(context, error);
       },
       (imageUrl) {
         context.push('/result', extra: {
@@ -82,15 +88,17 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFECA3),
+      backgroundColor: AppTheme.backgroundDark,
       appBar: AppBar(
+        forceMaterialTransparency: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textMain),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           "Kontext Flux",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style:
+              TextStyle(color: AppTheme.textMain, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -109,13 +117,14 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
                   width: double.infinity,
                   height: 300,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.surfacePrimary,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.black, width: 2),
-                    boxShadow: const [
+                    border: Border.all(color: AppTheme.borderSubtle, width: 1),
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black,
-                        offset: Offset(4, 4),
+                        color: AppTheme.accentPurple.withOpacity(0.15),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                     image: _selectedImage != null
@@ -129,14 +138,15 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.add_photo_alternate, size: 64, color: Colors.black45),
+                            Icon(Icons.add_photo_alternate,
+                                size: 64, color: AppTheme.textMuted),
                             SizedBox(height: 16),
                             Text(
                               "Tap to select an image",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black54,
+                                color: AppTheme.textMuted,
                               ),
                             ),
                           ],
@@ -145,26 +155,27 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // TEXT FIELD
               const Text(
                 "Describe what to change",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppTheme.textMain,
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.surfaceSecondary,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black, width: 2),
-                  boxShadow: const [
+                  border: Border.all(color: AppTheme.borderSubtle, width: 1),
+                  boxShadow: [
                     BoxShadow(
-                      color: Colors.black,
-                      offset: Offset(4, 4),
+                      color: AppTheme.accentPurple.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -172,31 +183,33 @@ class _KontextFluxPageState extends State<KontextFluxPage> {
                   controller: _promptController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    hintText: "E.g., Replace the background with a sunny beach...",
-                    hintStyle: TextStyle(color: Colors.black45),
+                    hintText:
+                        "E.g., Replace the background with a sunny beach...",
+                    hintStyle: TextStyle(color: AppTheme.textMuted),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.all(16),
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Colors.black,
+                    color: AppTheme.textMain,
                   ),
                 ),
               ),
               const SizedBox(height: 40),
-              
+
               // GENERATE BUTTON
               _isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.accentPurple),
                       ),
                     )
                   : PrimaryButton(
                       text: "Generate Magic ✨",
                       onTap: _generateImage,
                     ),
-              
+
               const SizedBox(height: 20),
             ],
           ),

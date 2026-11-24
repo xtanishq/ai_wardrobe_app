@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class FilterChipSelector extends StatelessWidget {
   final List<String> options;
@@ -27,16 +28,16 @@ class FilterChipSelector extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.black : Colors.white,
+                  color: isSelected ? AppTheme.accentPurple : AppTheme.surfaceSecondary,
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
-                    color: isSelected ? Colors.black : Colors.black12,
+                    color: isSelected ? AppTheme.accentPurple : AppTheme.borderSubtle,
                   ),
                 ),
                 child: Text(
                   option,
                   style: TextStyle(
-                    color: isSelected ? const Color(0xFFFFECA3) : Colors.black87,
+                    color: isSelected ? Colors.white : AppTheme.textMuted,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),

@@ -1,22 +1,22 @@
-class HairSwapModel {
-  final String id;
-  final String name;
-  final String gender;
-  final String url;
+class HairStyleModel {
+  final int id;
+  final String styleName;
+  final String displayUrl;
+  final List<String> tags;
 
-  HairSwapModel({
+  HairStyleModel({
     required this.id,
-    required this.name,
-    required this.gender,
-    required this.url,
+    required this.styleName,
+    required this.displayUrl,
+    required this.tags,
   });
 
-  factory HairSwapModel.fromJson(Map<String, dynamic> json) {
-    return HairSwapModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      gender: json['gender'] as String,
-      url: json['url'] as String,
+  factory HairStyleModel.fromJson(Map<String, dynamic> json) {
+    return HairStyleModel(
+      id: json['id'] is String ? int.parse(json['id']) : json['id'],
+      styleName: json['styleName'] ?? '',
+      displayUrl: json['displayUrl'] ?? '',
+      tags: List<String>.from(json['tags'] ?? []),
     );
   }
 }

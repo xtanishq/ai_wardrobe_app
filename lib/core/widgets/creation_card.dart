@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../theme/app_theme.dart';
 
 class CreationCard extends StatelessWidget {
   final String imageUrl;
@@ -20,13 +22,14 @@ class CreationCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: AppTheme.surfaceSecondary,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.borderSubtle, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             )
           ],
         ),
@@ -38,25 +41,35 @@ class CreationCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Image.network(
-                      imageUrl,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: AppTheme.surfacePrimary,
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentPurple),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => const Icon(Icons.error, color: AppTheme.textMuted),
                     ),
                   ),
                   Positioned(
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppTheme.surfacePrimary.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.borderSubtle, width: 1),
                       ),
                       child: Text(
                         featureLabel,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textMain,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -67,11 +80,11 @@ class CreationCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(16.0),
               child: Text(
                 dateStr,
                 style: const TextStyle(
-                  color: Colors.black54,
+                  color: AppTheme.textMuted,
                   fontSize: 12,
                 ),
               ),

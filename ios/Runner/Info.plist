@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>EaseFX AI</string>
+	<string>Glimora AI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>EaseFX AI</string>
+	<string>Glimora AI</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -54,6 +54,6 @@
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires access to the camera to take images for wardrobe generation.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>EaseFX AI needs permission to save your generated outfits to your photo library.</string>
+	<string>Glimora AI needs permission to save your generated outfits to your photo library.</string>
 </dict>
 </plist>

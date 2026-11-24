@@ -40,7 +40,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
         child: Column(
           children: [
@@ -67,16 +67,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           width: 88,
                           height: 88,
                           decoration: BoxDecoration(
-                            color: AppTheme.surface,
+                            color: AppTheme.surfacePrimary,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.black12),
+                            border: Border.all(color: AppTheme.borderSubtle),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.accentPurple.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
-                          child: Icon(p['icon'] as IconData, color: AppTheme.primary, size: 44),
+                          child: Icon(p['icon'] as IconData, color: AppTheme.accentPurple, size: 44),
                         ),
                         const SizedBox(height: 40),
                         Text(p['title'] as String,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: Colors.black, letterSpacing: -0.5)),
+                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppTheme.textMain, letterSpacing: -0.5)),
                         const SizedBox(height: 14),
                         Text(p['desc'] as String,
                             textAlign: TextAlign.center,
@@ -99,7 +106,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       width: _page == i ? 24 : 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: _page == i ? AppTheme.primary : Colors.black12,
+                        color: _page == i ? AppTheme.accentPurple : AppTheme.borderSubtle,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     )),

@@ -4,6 +4,7 @@ import '../../../../core/widgets/creation_card.dart';
 import '../../../../core/widgets/app_bottom_nav.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/data/creations_store.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class MyCreationsPage extends StatelessWidget {
@@ -15,7 +16,7 @@ class MyCreationsPage extends StatelessWidget {
     final bool isEmpty = creations.isEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFECA3),
+      backgroundColor: AppTheme.backgroundDark,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,13 +28,15 @@ class MyCreationsPage extends StatelessWidget {
                 children: [
                   Text(
                     "My Creations",
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppTheme.textMain,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     "Your saved AI edits",
                     style: TextStyle(
-                      color: Colors.black54,
+                      color: AppTheme.textMuted,
                       fontSize: 16,
                     ),
                   ),
@@ -46,6 +49,7 @@ class MyCreationsPage extends StatelessWidget {
           ],
         ),
       ),
+      extendBody: true,
       bottomNavigationBar: AppBottomNav(
         currentIndex: 1,
         onTap: (index) {
@@ -67,11 +71,12 @@ class MyCreationsPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surfacePrimary,
                 shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.borderSubtle),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   )
@@ -80,7 +85,7 @@ class MyCreationsPage extends StatelessWidget {
               child: const Icon(
                 Icons.photo_library_outlined,
                 size: 64,
-                color: Colors.black26,
+                color: AppTheme.textMuted,
               ),
             ),
             const SizedBox(height: 24),
@@ -89,7 +94,7 @@ class MyCreationsPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: AppTheme.textMain,
               ),
             ),
             const SizedBox(height: 8),
@@ -98,7 +103,7 @@ class MyCreationsPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.black54,
+                color: AppTheme.textMuted,
               ),
             ),
             const SizedBox(height: 32),
